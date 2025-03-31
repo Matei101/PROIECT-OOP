@@ -3,7 +3,6 @@
 #include <string>
 #include <iomanip>
 
-//    CLASS Player
 class Player {
 private:
     std::string name;
@@ -25,7 +24,6 @@ public:
     }
 };
 
-//       CLASS Team
 class Team {
 private:
     std::string name;
@@ -34,10 +32,8 @@ private:
 public:
     Team(const std::string& name) : name(name) {}
 
-    // Constructor de copiere
     Team(const Team& other) : name(other.name), players(other.players) {}
 
-    // Operator= de copiere
     Team& operator=(const Team& other) {
         if (this != &other) {
             name = other.name;
@@ -46,7 +42,6 @@ public:
         return *this;
     }
 
-    // Destructor
     ~Team() {}
 
     void addPlayer(const Player& p) {
@@ -84,7 +79,6 @@ public:
     }
 };
 
-//      CLASS Manager
 class Manager {
 private:
     std::string name;
@@ -124,7 +118,6 @@ public:
     }
 };
 
-//   CLASS Match
 class Match {
 private:
     const Team& team1;
@@ -155,7 +148,6 @@ public:
     }
 };
 
-//    MAIN
 int main() {
     std::vector<Player> transferList = {
         Player("Haaland", "ST", 91, 85),
