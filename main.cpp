@@ -30,7 +30,7 @@ private:
     std::vector<Player> players;
 
 public:
-    Team(const std::string& name) : name(name) {}
+    explicit Team(const std::string& name) : name(name) {}
 
     Team(const Team& other) : name(other.name), players(other.players) {}
 
