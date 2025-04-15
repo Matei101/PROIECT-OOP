@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -6,6 +5,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
+#include <limits>
 
 class Player {
 private:
@@ -78,9 +78,9 @@ public:
     void salveazaInFisier(const std::string& filename) const {
         std::ofstream out(filename);
         if (!out.is_open()) return;
-        out << "Nume Echipa " << name << " ";
+        out << "Nume Echipa " << name << "\n";
         for (const auto& p : players) {
-            out << p.getName() << " " << p.getPosition() << " " << p.getSkill() << " " << p.getValue() << " ";
+            out << p.getName() << " " << p.getPosition() << " " << p.getSkill() << " " << p.getValue() << "\n";
         }
     }
 
@@ -101,16 +101,16 @@ public:
 
     void afiseazaPePozitie(const std::string& poz) const {
         for (const auto& p : players) {
-            if (p.getPosition() == poz) std::cout << p << " ";
+            if (p.getPosition() == poz) std::cout << p << "\n";
         }
     }
 
     std::vector<Player>& getPlayers() { return players; }
 
     friend std::ostream& operator<<(std::ostream& out, const Team& t) {
-        out << "Team: " << t.name << " ";
+        out << "Team: " << t.name << "\n";
         for (const auto& p : t.players) {
-            out << "  " << p << " ";
+            out << "  " << p << "\n";
         }
         return out;
     }
@@ -156,7 +156,7 @@ public:
     }
 
     void showStatus() const {
-        std::cout << "Manager: " << name << ", Buget: $" << std::fixed << std::setprecision(2) << budget << " ";
+        std::cout << "Manager: " << name << ", Buget: $" << std::fixed << std::setprecision(2) << budget << "\n";
         std::cout << team;
     }
 
@@ -182,7 +182,7 @@ public:
     }
 
     void showResult() const {
-        std::cout << "Rezultat meci: " << team1.getName() << " " << score1 << " - " << score2 << " " << team2.getName() << " ";
+        std::cout << "Rezultat meci: " << team1.getName() << " " << score1 << " - " << score2 << " " << team2.getName() << "\n";
     }
 
     int getScore1() const { return score1; }
@@ -213,16 +213,21 @@ int main() {
         Player("DeBruyne", "CM", 91, 90)
     };
 
-    Team team1("FC Legend"), team2("Superstars United");
+    Team team1("Team A"), team2("Team B");
     team1.addPlayer(Player("Messi", "RW", 95, 100));
     team1.addPlayer(Player("Modric", "CM", 89, 70));
+    team1.addPlayer(Player("Alaba", "CB", 86, 50));
+    team1.addPlayer(Player("Ederson", "GK", 89, 60));
+    team1.addPlayer(Player("Saliba", "CB", 88, 80));
     team2.addPlayer(Player("Ronaldo", "ST", 92, 90));
     team2.addPlayer(Player("VanDijk", "CB", 88, 75));
     team2.addPlayer(Player("Mbappe", "LW", 93, 95));
+    team2.addPlayer(Player("Raya", "GK", 85, 50));
+    team2.addPlayer(Player("Bastoni", "CB", 87, 75));
 
     Manager manager1("Alex", team1, 200);
     Manager manager2("Chris", team2, 150);
-    Clasament clasament1{"FC Legend"}, clasament2{"Superstars United"};
+    Clasament clasament1{"Team A"}, clasament2{"Team B"};
 
     int choice;
     bool running = true;
@@ -239,6 +244,7 @@ int main() {
         std::cout << "8. Cumpără (Manager 2)\n";
         std::cout << "9. Vinde (Manager 2)\n";
         std::cout << "10. Filtrare jucători după poziție (Manager 1)\n";
+        std::cout << "11. Afișează clasamentul\n";
         std::cout << "0. Ieșire\n";
         std::cout << "Alege o opțiune: ";
         std::cin >> choice;
@@ -278,6 +284,30 @@ int main() {
                 Match m(team1, team2);
                 m.simulate();
                 m.showResult();
+
+                const auto& p1 = team1.getPlayers();
+                const auto& p2 = team2.getPlayers();
+
+                std::cout << "Marcatori " << team1.getName() << ": ";
+                for (int i = 0; i < m.getScore1(); ++i) {
+                    if (!p1.empty()) {
+                        const Player& scorer = p1[rand() % p1.size()];
+                        std::cout << scorer.getName() << " ";
+                    }
+                }
+                if (m.getScore1() == 0) std::cout << "niciunul";
+                std::cout << "\n";
+
+                std::cout << "Marcatori " << team2.getName() << ": ";
+                for (int i = 0; i < m.getScore2(); ++i) {
+                    if (!p2.empty()) {
+                        const Player& scorer = p2[rand() % p2.size()];
+                        std::cout << scorer.getName() << " ";
+                    }
+                }
+                if (m.getScore2() == 0) std::cout << "niciunul";
+                std::cout << "\n";
+
                 clasament1.actualizeaza(m.getScore1(), m.getScore2());
                 clasament2.actualizeaza(m.getScore2(), m.getScore1());
                 break;
@@ -334,6 +364,12 @@ int main() {
                 break;
             }
 
+            case 11: {
+                clasament1.afiseaza();
+                clasament2.afiseaza();
+                break;
+            }
+
             case 0:
                 running = false;
                 break;
@@ -343,9 +379,6 @@ int main() {
                 break;
         }
     }
-
-    clasament1.afiseaza();
-    clasament2.afiseaza()
 
     return 0;
 }
