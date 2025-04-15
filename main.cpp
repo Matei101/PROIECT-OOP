@@ -345,7 +345,7 @@ int main() {
     }
 
     clasament1.afiseaza();
-    clasament2.afiseaza();
+    clasament2.afiseaza()
 
     return 0;
 }
