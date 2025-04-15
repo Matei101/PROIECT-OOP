@@ -238,13 +238,11 @@ int main() {
         std::cout << "2. Cumpără (Manager 1)\n";
         std::cout << "3. Vinde (Manager 1)\n";
         std::cout << "4. Simulează meci\n";
-        std::cout << "5. Salvează echipa (Manager 1)\n";
-        std::cout << "6. Încarcă echipa (Manager 1)\n";
-        std::cout << "7. Antrenează jucător (Manager 1)\n";
-        std::cout << "8. Cumpără (Manager 2)\n";
-        std::cout << "9. Vinde (Manager 2)\n";
-        std::cout << "10. Filtrare jucători după poziție (Manager 1)\n";
-        std::cout << "11. Afișează clasamentul\n";
+        std::cout << "5. Antrenează jucător (Manager 1)\n";
+        std::cout << "6. Cumpără (Manager 2)\n";
+        std::cout << "7. Vinde (Manager 2)\n";
+        std::cout << "8. Filtrare jucători după poziție (Manager 1)\n";
+        std::cout << "9. Afișează clasamentul\n";
         std::cout << "0. Ieșire\n";
         std::cout << "Alege o opțiune: ";
         std::cin >> choice;
@@ -313,15 +311,7 @@ int main() {
                 break;
             }
 
-            case 5:
-                manager1.getTeam().salveazaInFisier("echipa1.txt");
-                break;
-
-            case 6:
-                manager1.getTeam().incarcaDinFisier("tastatura.txt");
-                break;
-
-            case 7: {
+            case 5: {
                 std::string name;
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 std::cout << "Numele jucătorului de antrenat (Manager 1): ";
@@ -330,7 +320,7 @@ int main() {
                 break;
             }
 
-            case 8: {
+            case 6: {
                 for (size_t i = 0; i < transferList.size(); ++i)
                     std::cout << i + 1 << ". " << transferList[i] << "\n";
                 int opt;
@@ -346,7 +336,7 @@ int main() {
                 break;
             }
 
-            case 9: {
+            case 7: {
                 std::string name;
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 std::cout << "Numele jucătorului de vândut (Manager 2): ";
@@ -355,7 +345,7 @@ int main() {
                 break;
             }
 
-            case 10: {
+            case 8: {
                 std::string poz;
                 std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 std::cout << "Poziția de filtrare (ex: ST, CM, GK): ";
@@ -364,7 +354,7 @@ int main() {
                 break;
             }
 
-            case 11: {
+            case 9: {
                 clasament1.afiseaza();
                 clasament2.afiseaza();
                 break;
