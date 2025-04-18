@@ -260,8 +260,11 @@ public:
     }
 
     void showStatus() const {
-        std::cout << *this;
+        std::cout << "Manager: " << name
+                  << ", Buget: $" << std::fixed << std::setprecision(2) << getBudget() << "\n";
+        std::cout << team;
     }
+
 
     Team& getTeam() { return team; }
 
