@@ -92,14 +92,6 @@ public:
         return false;
     }
 
-    void salveazaInFisier(const std::string& filename) const {
-        std::ofstream out(filename);
-        if (!out.is_open()) return;
-        out << "Nume Echipa " << name << "\n";
-        for (const auto& p : players) {
-            out << p.getName() << " " << p.getPosition() << " " << p.getSkill() << " " << p.getValue() << "\n";
-        }
-    }
 
     void incarcaDinFisier(const std::string& filename) {
         std::ifstream in(filename);
@@ -327,17 +319,17 @@ private:
 
 public:
     Game(Team& t1, Team& t2)
-        : manager1("Alex", t1, 200),
-          manager2("Chris", t2, 150),
-          clasament1(t1.getName()),
-          clasament2(t2.getName()) {
-        transferList = {
-            Player("Haaland", "ST", 91, 85),
-            Player("Neymar", "LW", 90, 88),
-            Player("Kane", "ST", 89, 80),
-            Player("DeBruyne", "CM", 91, 90)
-        };
-    }
+    : transferList({
+          Player("Haaland", "ST", 91, 85),
+          Player("Neymar", "LW", 90, 88),
+          Player("Kane", "ST", 89, 80),
+          Player("DeBruyne", "CM", 91, 90)
+      }),
+      manager1("Alex", t1, 200),
+      manager2("Chris", t2, 150),
+      clasament1(t1.getName()),
+      clasament2(t2.getName()) {}
+
 
     void run() {
         int choice;
@@ -456,20 +448,23 @@ public:
         const auto& j1 = manager1.getTeam().getPlayers();
         const auto& j2 = manager2.getTeam().getPlayers();
 
+        bool gasit1 = false, gasit2 = false;
+        for (const auto& j : j1) if (j.getPosition() == poz) gasit1 = true;
+        for (const auto& j : j2) if (j.getPosition() == poz) gasit2 = true;
+
         std::cout << "\n[Manager 1] Jucători pe poziția " << poz << ":\n";
-        bool gasit1 = false;
-        for (const auto& j : j1) {
-            if (j.getPosition() == poz) { std::cout << j << "\n"; gasit1 = true; }
-        }
-        if (!gasit1) std::cout << "Nu există jucători pe această poziție în echipa 1.\n";
+        if (gasit1)
+            manager1.getTeam().afiseazaPePozitie(poz);
+        else
+            std::cout << "Nu există jucători pe această poziție în echipa 1.\n";
 
         std::cout << "\n[Manager 2] Jucători pe poziția " << poz << ":\n";
-        bool gasit2 = false;
-        for (const auto& j : j2) {
-            if (j.getPosition() == poz) { std::cout << j << "\n"; gasit2 = true; }
-        }
-        if (!gasit2) std::cout << "Nu există jucători pe această poziție în echipa 2.\n";
+        if (gasit2)
+            manager2.getTeam().afiseazaPePozitie(poz);
+        else
+            std::cout << "Nu există jucători pe această poziție în echipa 2.\n";
     }
+
 
     void showStatistics() {
         std::cout << "[Manager 1] Statistici:\n";
