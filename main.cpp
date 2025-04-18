@@ -301,6 +301,7 @@ struct Clasament {
     std::string teamName;
     int puncte = 0;
     int meciuri = 0;
+    Clasament(const std::string& name) : teamName(name) {}
     void actualizeaza(int scor1, int scor2) {
         ++meciuri;
         if (scor1 > scor2) puncte += 3;
