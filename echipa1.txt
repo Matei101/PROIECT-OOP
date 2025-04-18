@@ -1,0 +1,6 @@
+Nume Echipa Team A
+Messi ST 95 100
+Modric CM 89 70
+Alaba CB 86 60
+Ederson GK 90 65
+Saka ST 88 75

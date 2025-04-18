@@ -1,0 +1,6 @@
+Nume Echipa Team B
+Ronaldo ST 92 90
+Mbappe ST 93 95
+VanDijk CB 89 80
+Neuer GK 91 85
+Kroos CM 88 78
