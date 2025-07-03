@@ -128,23 +128,23 @@ void Game::topJucatori() {
     std::cout << "[Manager 1] Top jucători:\n";
     manager1.getTeam().afiseazaTopJucatori(3);
     std::cout << "[Manager 2] Top jucători:\n";
-    manager2.getTeam().afiseazaTopJucători(3);
+    manager2.getTeam().afiseazaTopJucatori(3);
 }
 
-void Game::editeazaJucător() {
+void Game::editeazaJucator() {
     std::string nume;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Numele jucătorului de editat: ";
     std::getline(std::cin, nume);
-    manager1.getTeam().editeazaJucător(nume);
-    manager2.getTeam().editeazăJucător(nume);
+    manager1.getTeam().editeazaJucator(nume);
+    manager2.getTeam().editeazaJucator(nume);
 }
 
 void Game::transferRandom() {
     manager1.getTeam().transferRandom(manager2.getTeam());
 }
 
-void Game::aplicaAccidentări(Team& team) {
+void Game::aplicaAccidentari(Team& team) {
     for (auto& p : team.getPlayers()) {
         if (!p.isAccidentat() && rand() % 100 < 10) {
             p.accid();
@@ -153,7 +153,7 @@ void Game::aplicaAccidentări(Team& team) {
     }
 }
 
-void Game::verificăContracte() {
+void Game::verificaContracte() {
     auto check = [](Team& t) {
         auto& v = t.getPlayers();
         for (auto& p : v) p.decContract();
@@ -207,11 +207,11 @@ void Game::run() {
             case 7: handleSell(manager2);    break;
             case 8: filterByPosition();      break;
             case 9: showStatistics();        break;
-            case 10: topJucători();          break;
-            case 11: editeazăJucător();      break;
+            case 10: topJucatori();          break;
+            case 11: editeazaJucator();      break;
             case 12: transferRandom();       break;
             case 13: oferteTransfer();       break;
-            case 14: verificăContracte();    break;
+            case 14: verificaContracte();    break;
             case 0: running = false;        break;
             default: std::cout << "Opțiune invalidă.\n"; break;
         }
