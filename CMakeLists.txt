@@ -51,6 +51,18 @@ include(cmake/CopyHelper.cmake)
 add_executable(${MAIN_EXECUTABLE_NAME}
     main.cpp
     generated/src/Helper.cpp
+        Player.cpp
+        Player.h
+        Manager.cpp
+        Manager.h
+        Team.cpp
+        Team.h
+        Match.cpp
+        Match.h
+        Clasament.cpp
+        Clasament.h
+        Game.cpp
+        Game.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
