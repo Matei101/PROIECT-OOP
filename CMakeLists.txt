@@ -67,6 +67,11 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         Person.h
         Coach.cpp
         Coach.h
+        Exception.h
+        FileLoader.cpp
+        FileLoader.h
+        BudgetManager.cpp
+        BudgetManager.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
