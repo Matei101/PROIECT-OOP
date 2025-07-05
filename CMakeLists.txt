@@ -63,6 +63,10 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         Clasament.h
         Game.cpp
         Game.h
+        Person.cpp
+        Person.h
+        Coach.cpp
+        Coach.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

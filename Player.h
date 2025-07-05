@@ -1,33 +1,37 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <iostream>
+#include "Person.h"
 #include <string>
+#include <iostream>
+#include <iomanip>
 
-class Player {
+class Player : public Person {
 public:
     Player(const std::string& name,
            const std::string& position,
            int skill,
            double value,
            int contractYears = 3);
+    Player(const Player& other) = default;
 
-    const std::string& getName() const;
-    const std::string& getPosition() const;
-    int getSkill() const;
-    double getValue() const;
-    int getContractYears() const;
-    bool isAccidentat() const;
+    void displayInfo() const override;
+    Person* clone() const override { return new Player(*this); }
 
     void train(int amount);
     void accid();
     void recuperare();
     void decContract();
 
+    int getSkill() const;
+    double getValue() const;
+    std::string getPosition() const;
+    bool isAccidentat() const;
+    int getContractYears() const;
+
     friend std::ostream& operator<<(std::ostream& out, const Player& p);
 
 private:
-    std::string name;
     std::string position;
     int skill;
     double value;

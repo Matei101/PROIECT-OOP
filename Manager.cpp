@@ -1,40 +1,48 @@
 #include "Manager.h"
 
-Manager::Manager(const std::string& name, const Team& team, double budget)
-    : name(name), team(team), budget(budget)
+Manager::Manager(const std::string& name,
+                 const Team& team,
+                 double budget)
+    : Person(name)
+    , team(team)
+    , budget(budget)
 {}
 
+void Manager::displayInfo() const {
+    std::cout << "Manager: " << getName()
+              << ", Buget: $" << std::fixed << std::setprecision(2) << budget << '\n';
+}
+
 bool Manager::buyPlayer(const Player& p) {
-    if (budget >= p.getValue()) {
-        team.addPlayer(p);
-        budget -= p.getValue();
-        return true;
+    if (budget < p.getValue()) {
+        std::cout << "Buget insuficient pentru " << p.getName() << '\n';
+        return false;
     }
-    return false;
+    team.addPlayer(p);
+    budget -= p.getValue();
+    return true;
 }
 
 bool Manager::sellPlayer(const std::string& playerName) {
-    Player sold("", "", 0, 0);
-    if (team.transferOutPlayer(playerName, sold)) {
-        budget += sold.getValue();
+    Player soldPlayer("", "", 0, 0);
+    if (team.transferOutPlayer(playerName, soldPlayer)) {
+        budget += soldPlayer.getValue();
         return true;
     }
     return false;
 }
 
-void Manager::trainPlayer(const std::string& playerName) {
-    for (auto& p : team.getPlayers()) {
-        if (p.getName() == playerName) {
-            p.train(5);
-            return;
-        }
-    }
+Team& Manager::getTeam() {
+    return team;
 }
 
-void Manager::showStatus() const {
-    std::cout << "Manager: " << name
-              << ", Buget: $" << std::fixed << std::setprecision(2) << budget << "\n"
-              << team;
+const Team& Manager::getTeam() const {
+    return team;
 }
 
-Team& Manager::getTeam() { return team; }
+std::ostream& operator<<(std::ostream& out, const Manager& m) {
+    out << "Manager: " << m.getName()
+        << ", Buget: $" << std::fixed << std::setprecision(2) << m.budget << "\n"
+        << m.team;
+    return out;
+}
