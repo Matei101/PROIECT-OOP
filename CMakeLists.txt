@@ -87,6 +87,14 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         Commentary.h
         Chemistry.cpp
         Chemistry.h
+        Economy.cpp
+        Economy.h
+        EventManager.cpp
+        EventManager.h
+        AIManager.cpp
+        AIManager.h
+        TimeUtils.cpp
+        TimeUtils.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

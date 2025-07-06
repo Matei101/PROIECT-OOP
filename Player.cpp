@@ -1,5 +1,9 @@
 #include "Player.h"
 
+Player::Player()
+  : Person(""), position(""), skill(0), value(0.0), accidentat(false), contractYears(0)
+{}
+
 Player::Player(const std::string& name,
                const std::string& position,
                int skill,

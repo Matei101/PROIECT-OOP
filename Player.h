@@ -8,6 +8,7 @@
 
 class Player : public Person {
 public:
+    Player();
     Player(const std::string& name,
            const std::string& position,
            int skill,
