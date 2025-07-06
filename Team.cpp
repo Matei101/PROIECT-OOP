@@ -1,6 +1,7 @@
 #include "Team.h"
-#include <fstream>
+#include <numeric>
 #include <algorithm>
+#include <fstream>
 #include <limits>
 
 Team::Team(const std::string& name)
@@ -23,25 +24,31 @@ Team& Team::operator=(const Team& other) {
 Team::~Team() {}
 
 void Team::addPlayer(const Player& p) {
+    if (players.size() >= MAX_PLAYERS) {
+        std::cout << "Echipa \"" << name
+                  << "\" a atins capacitatea maxima ("
+                  << MAX_PLAYERS << " jucatori).\n";
+        return;
+    }
     players.push_back(p);
 }
 
 double Team::averageSkill() const {
     if (players.empty()) return 0;
-    int total = 0;
-    for (const auto& p : players) total += p.getSkill();
-    return static_cast<double>(total) / players.size();
+    double total = std::accumulate(
+        players.begin(), players.end(), 0.0,
+        [](double sum, const Player& p){ return sum + p.getSkill(); }
+    );
+    return total / players.size();
 }
 
 bool Team::transferOutPlayer(const std::string& playerName, Player& outPlayer) {
-    for (auto it = players.begin(); it != players.end(); ++it) {
-        if (it->getName() == playerName) {
-            outPlayer = *it;
-            players.erase(it);
-            return true;
-        }
-    }
-    return false;
+    auto it = std::find_if(players.begin(), players.end(),
+        [&](const Player& p){ return p.getName() == playerName; });
+    if (it == players.end()) return false;
+    outPlayer = *it;
+    players.erase(it);
+    return true;
 }
 
 void Team::incarcaDinFisier(const std::string& filename) {
@@ -50,14 +57,13 @@ void Team::incarcaDinFisier(const std::string& filename) {
     players.clear();
     std::string line;
     std::getline(in, line);
-    if (line.rfind("Nume Echipa ", 0) == 0)
+    if (line.rfind("Nume Echipa", 0) == 0)
         name = line.substr(12);
-
     std::string nume, pozitie;
     int skill;
     double valoare;
     while (in >> nume >> pozitie >> skill >> valoare) {
-        players.push_back(Player(nume, pozitie, skill, valoare));
+        players.emplace_back(nume, pozitie, skill, valoare);
     }
 }
 
@@ -72,23 +78,22 @@ void Team::afiseazaStatistici() const {
         std::cout << "Echipa nu are jucători.\n";
         return;
     }
-    double totalSkill = 0, totalValoare = 0;
+    double totalSkill = 0, totalValue = 0;
     for (const auto& p : players) {
         totalSkill  += p.getSkill();
-        totalValoare+= p.getValue();
+        totalValue += p.getValue();
     }
-    std::cout << "Media skill: " << totalSkill/players.size() << "\n";
-    std::cout << "Valoare totală: $" << totalValoare << "\n";
+    std::cout << "Media skill: " << totalSkill / players.size() << "\n";
+    std::cout << "Valoare totală: $" << totalValue << "\n";
 }
 
 void Team::afiseazaTopJucatori(int n) const {
-    if (players.empty()) {
-        std::cout << "Nu există jucători.\n";
-        return;
-    }
+    if (players.empty()) return;
     auto top = players;
     std::sort(top.begin(), top.end(),
-              [](const Player& a, const Player& b){ return a.getSkill() > b.getSkill(); });
+              [](const Player& a, const Player& b){
+                  return a.getSkill() > b.getSkill();
+              });
     for (int i = 0; i < std::min(n, (int)top.size()); ++i)
         std::cout << top[i] << "\n";
 }
@@ -96,7 +101,7 @@ void Team::afiseazaTopJucatori(int n) const {
 void Team::editeazaJucator(const std::string& nume) {
     for (auto& p : players) {
         if (p.getName() == nume) {
-            std::cout << "1. Schimbă skill\n2. Schimbă valoare\n3. Reset accidentare\n4. Prelungește contract\n";
+            std::cin >> std::ws;
             int opt; std::cin >> opt;
             switch (opt) {
                 case 1: {
@@ -106,7 +111,8 @@ void Team::editeazaJucator(const std::string& nume) {
                 }
                 case 2: {
                     double v; std::cin >> v;
-                    p = Player(p.getName(), p.getPosition(), p.getSkill(), v, p.getContractYears());
+                    p = Player(p.getName(), p.getPosition(),
+                               p.getSkill(), v, p.getContractYears());
                     break;
                 }
                 case 3:
@@ -114,7 +120,9 @@ void Team::editeazaJucator(const std::string& nume) {
                     break;
                 case 4: {
                     int ani; std::cin >> ani;
-                    p = Player(p.getName(), p.getPosition(), p.getSkill(), p.getValue(), p.getContractYears()+ani);
+                    p = Player(p.getName(), p.getPosition(),
+                               p.getSkill(), p.getValue(),
+                               p.getContractYears() + ani);
                     break;
                 }
             }
@@ -125,19 +133,29 @@ void Team::editeazaJucator(const std::string& nume) {
 
 void Team::transferRandom(Team& other) {
     if (players.empty()) return;
-    int idx = rand() % players.size();
+    int idx = std::rand() % players.size();
     Player p = players[idx];
-    players.erase(players.begin()+idx);
+    players.erase(players.begin() + idx);
     other.addPlayer(p);
-    std::cout << "🔁 " << p.getName() << " către " << other.getName() << "\n";
+    std::cout << p.getName() << " transferat.\n";
 }
 
-std::vector<Player>& Team::getPlayers() { return players; }
-const std::string& Team::getName() const { return name; }
+std::vector<Player>& Team::getPlayers() {
+    return players;
+}
+
+const std::vector<Player>& Team::getPlayers() const {
+    return players;
+}
+
+const std::string& Team::getName() const {
+    return name;
+}
 
 std::ostream& operator<<(std::ostream& out, const Team& t) {
-    out << "Team: " << t.name << "\n";
-    for (const auto& p : t.players)
+    out << "Team: " << t.getName() << "\n";
+    for (const auto& p : t.getPlayers())
         out << "  " << p << "\n";
     return out;
 }
+

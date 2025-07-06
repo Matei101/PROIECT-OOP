@@ -72,6 +72,7 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         FileLoader.h
         BudgetManager.cpp
         BudgetManager.h
+        Random.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

@@ -13,6 +13,8 @@ public:
     Team& operator=(const Team& other);
     ~Team();
 
+    static constexpr size_t MAX_PLAYERS = 25;
+
     void addPlayer(const Player& p);
     double averageSkill() const;
     bool transferOutPlayer(const std::string& playerName, Player& outPlayer);
@@ -24,13 +26,15 @@ public:
     void transferRandom(Team& other);
 
     std::vector<Player>& getPlayers();
-    const std::string& getName() const;
+    const std::vector<Player>& getPlayers() const;
 
-    friend std::ostream& operator<<(std::ostream& out, const Team& t);
+    const std::string& getName() const;
 
 private:
     std::string name;
     std::vector<Player> players;
 };
+
+std::ostream& operator<<(std::ostream& out, const Team& t);
 
 #endif // TEAM_H

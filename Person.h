@@ -9,14 +9,16 @@ public:
     virtual ~Person();
 
     void show() const { displayInfo(); }
+
     virtual void displayInfo() const = 0;
     virtual Person* clone() const = 0;
 
     const std::string& getName() const;
+    static int getTotalPersons();
 
 private:
     std::string name;
     static int totalPersons;
 };
 
-#endif
+#endif // PERSON_H
