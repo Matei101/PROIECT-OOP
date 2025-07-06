@@ -79,6 +79,14 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         Season.h
         Stats.cpp
         Stats.h
+        Achievements.cpp
+        Achievements.h
+        TrainingLog.cpp
+        TrainingLog.h
+        Commentary.cpp
+        Commentary.h
+        Chemistry.cpp
+        Chemistry.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )
