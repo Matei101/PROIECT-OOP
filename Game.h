@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <vector>
+#include <string>
 #include "Person.h"
 #include "Player.h"
 #include "Manager.h"
@@ -15,14 +16,22 @@
 #include "TrainingLog.h"
 #include "Commentary.h"
 #include "Chemistry.h"
+#include "Economy.h"
+#include "EventManager.h"
+#include "AIManager.h"
 
 class Game {
 public:
-    Game(Team& t1, Team& t2);
+    Game(Team& t1,
+         Team& t2,
+         EventManager& events,
+         Economy& economy,
+         AIManager& ai);
     Game(const Game& other);
     Game& operator=(Game other);
     friend void swap(Game& a, Game& b) noexcept;
     ~Game();
+
     void run();
 
 private:
@@ -33,8 +42,8 @@ private:
     void handleTrain();
     void handleCoachTrain();
     void filterByPosition();
-    void showStatistics();
-    void topJucatori();
+    void showStatistics() const;
+    void topJucatori() const;
     void editeazaJucator();
     void transferRandom();
     void aplicaAccidentari(Team& team);
@@ -48,6 +57,10 @@ private:
     void viewTrainingLog() const;
     void viewChemistry() const;
     void saveStandingsToFile(const std::string& filename) const;
+    void viewEconomy(const std::string& team) const;
+    void takeLoan(const std::string& team);
+    void sponsor(const std::string& team);
+    void suggestTransfers();
 
     std::vector<Person*> actors;
     Person*            currentActor = nullptr;
@@ -62,6 +75,9 @@ private:
     Achievements       achievements;
     TrainingLog        trainLog;
     Chemistry          chemistry;
+    EventManager&      events;
+    Economy&           economy;
+    AIManager&         ai;
 };
 
 #endif // GAME_H

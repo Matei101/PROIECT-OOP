@@ -7,13 +7,13 @@
 
 class Season {
 public:
-    explicit Season(const std::vector<Team*>& teams);
+    Season(const std::vector<Team*>& teams);
     void playFullSeason();
     void printStandings() const;
+
 private:
-    std::vector<Clasament> standings;
     std::vector<Team*> teams;
-    void initStandings();
+    std::vector<Clasament> standings;
 };
 
 #endif // SEASON_H

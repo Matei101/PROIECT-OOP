@@ -1,4 +1,7 @@
 #include "Game.h"
+#include "Economy.h"
+#include "EventManager.h"
+#include "AIManager.h"
 #include <iostream>
 #include <limits>
 #include <algorithm>
@@ -20,6 +23,9 @@ void swap(Game& a, Game& b) noexcept {
     swap(a.achievements, b.achievements);
     swap(a.trainLog,     b.trainLog);
     swap(a.chemistry,    b.chemistry);
+    swap(a.events,       b.events);
+    swap(a.economy,      b.economy);
+    swap(a.ai,           b.ai);
 }
 
 Game::Game(const Game& other)
@@ -36,6 +42,9 @@ Game::Game(const Game& other)
   , achievements(other.achievements)
   , trainLog(other.trainLog)
   , chemistry(other.chemistry)
+  , events(other.events)
+  , economy(other.economy)
+  , ai(other.ai)
 {
     if (other.season)
         season = new Season(*other.season);
@@ -50,7 +59,11 @@ Game::~Game() {
     delete season;
 }
 
-Game::Game(Team& t1, Team& t2)
+Game::Game(Team& t1,
+           Team& t2,
+           EventManager& em,
+           Economy& econ,
+           AIManager& aiMgr)
   : transferList({
         Player("Haaland","ST",91,85),
         Player("Neymar","LW",90,88),
@@ -67,12 +80,16 @@ Game::Game(Team& t1, Team& t2)
   , achievements()
   , trainLog()
   , chemistry()
+  , events(em)
+  , economy(econ)
+  , ai(aiMgr)
 {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
     actors = { &manager1, &coach1, &manager2 };
     for (auto& p : t1.getPlayers())
         actors.push_back(&p);
 }
+
 
 void Game::displayMenu() const {
     std::cout << "\n===== MENIU =====\n"
@@ -122,26 +139,45 @@ void Game::handleSell() {
 }
 
 void Game::simulateMatch() {
-    pushState:
     Match m(manager1.getTeam(), manager2.getTeam());
     m.simulate();
+
     chemistry.recordResult(manager1.getTeam().getName(), m.getScore1() > m.getScore2());
     chemistry.recordResult(manager2.getTeam().getName(), m.getScore2() > m.getScore1());
+
     m.showResult();
     std::cout << Commentary::forMatch(m.getScore1(), m.getScore2()) << "\n";
+
     aplicaAccidentari(manager1.getTeam());
     aplicaAccidentari(manager2.getTeam());
+
     const auto& p1 = manager1.getTeam().getPlayers();
     const auto& p2 = manager2.getTeam().getPlayers();
+
     std::cout << "Marcatori " << manager1.getTeam().getName() << ": ";
-    if (m.getScore1() == 0) std::cout << "niciunul";
-    else for (int i = 0; i < m.getScore1(); ++i) std::cout << p1[std::rand()%p1.size()].getName() << " ";
+    if (m.getScore1() == 0) {
+        std::cout << "niciunul";
+    } else {
+        for (int i = 0; i < m.getScore1(); ++i) {
+            const auto* scorer = &p1[std::rand() % p1.size()];
+            std::cout << scorer->getName() << " ";
+        }
+    }
+
     std::cout << "\nMarcatori " << manager2.getTeam().getName() << ": ";
-    if (m.getScore2() == 0) std::cout << "niciunul";
-    else for (int i = 0; i < m.getScore2(); ++i) std::cout << p2[std::rand()%p2.size()].getName() << " ";
+    if (m.getScore2() == 0) {
+        std::cout << "niciunul";
+    } else {
+        for (int i = 0; i < m.getScore2(); ++i) {
+            const auto* scorer = &p2[std::rand() % p2.size()];
+            std::cout << scorer->getName() << " ";
+        }
+    }
     std::cout << "\n";
+
     clasament1.actualizeaza(m.getScore1(), m.getScore2());
     clasament2.actualizeaza(m.getScore2(), m.getScore1());
+
     history.add({ manager1.getTeam().getName(), m.getScore1(),
                   manager2.getTeam().getName(), m.getScore2() });
 }
@@ -168,13 +204,14 @@ void Game::filterByPosition() {
     manager2.getTeam().afiseazaPePozitie(poz);
 }
 
-void Game::showStatistics() {
+void Game::showStatistics() const {
     manager1.getTeam().afiseazaStatistici();
     manager2.getTeam().afiseazaStatistici();
 }
 
-void Game::topJucatori() {
+void Game::topJucatori() const {
     manager1.getTeam().afiseazaTopJucatori(3);
+    manager2.getTeam().afiseazaTopJucatori(3);
 }
 
 void Game::editeazaJucator() {
@@ -270,7 +307,7 @@ void Game::run() {
         displayMenu();
         std::cin >> ch;
         switch (ch) {
-            case 1: for (auto* a : actors) a->show(); break;
+            case 1: for (const auto* a : actors) a->show(); break;
             case 2: handleTransfer();           break;
             case 3: handleSell();               break;
             case 4: simulateMatch();            break;

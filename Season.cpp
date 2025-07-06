@@ -1,41 +1,36 @@
+
 #include "Season.h"
 #include "Match.h"
 #include <algorithm>
 #include <iostream>
 
-Season::Season(const std::vector<Team*>& t)
-    : teams(t)
-{
-    initStandings();
-}
-
-void Season::initStandings() {
-    standings.clear();
-    for (auto* team : teams)
-        standings.emplace_back(team->getName());
-}
+Season::Season(const std::vector<Team*>& teams)
+  : teams(teams), standings()
+{}
 
 void Season::playFullSeason() {
-    int n = teams.size();
-    for (int i = 0; i < n; ++i) {
-        for (int j = i + 1; j < n; ++j) {
+    for (auto* t : teams) {
+        standings.emplace_back(t->getName());
+    }
+    for (size_t i = 0; i < teams.size(); ++i) {
+        for (size_t j = i + 1; j < teams.size(); ++j) {
             Match m(*teams[i], *teams[j]);
             m.simulate();
-            int s1 = m.getScore1();
-            int s2 = m.getScore2();
-            standings[i].actualizeaza(s1, s2);
-            standings[j].actualizeaza(s2, s1);
+            standings[i].actualizeaza(m.getScore1(), m.getScore2());
+            standings[j].actualizeaza(m.getScore2(), m.getScore1());
         }
     }
+    std::sort(standings.begin(), standings.end(),
+              [](const Clasament& a, const Clasament& b) {
+                  return a.puncte > b.puncte;
+              });
 }
 
 void Season::printStandings() const {
-    auto sorted = standings;
-    std::sort(sorted.begin(), sorted.end(),
-              [](auto& a, auto& b){ return a.puncte > b.puncte; });
-    std::cout << "\n=== Season Standings ===\n";
-    for (const auto& e : sorted) {
-        e.afiseaza();
+    for (const auto& c : standings) {
+        std::cout << c.teamName
+                  << " | Meciuri: " << c.meciuri
+                  << " | Puncte: "   << c.puncte
+                  << "\n";
     }
-    std::cout << "\n";
 }

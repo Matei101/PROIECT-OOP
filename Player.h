@@ -26,7 +26,7 @@ public:
 
     int getSkill() const;
     double getValue() const;
-    std::string getPosition() const;
+    const std::string& getPosition() const;
     bool isAccidentat() const;
     int getContractYears() const;
 

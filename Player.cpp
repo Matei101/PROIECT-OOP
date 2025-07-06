@@ -48,7 +48,7 @@ double Player::getValue() const {
     return value;
 }
 
-std::string Player::getPosition() const {
+const std::string& Player::getPosition() const {
     return position;
 }
 
