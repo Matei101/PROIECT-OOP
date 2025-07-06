@@ -8,13 +8,18 @@
 #include "Coach.h"
 #include "Match.h"
 #include "Clasament.h"
+#include "History.h"
+#include "Season.h"
+#include "Stats.h"
 
 class Game {
 public:
     Game(Team& t1, Team& t2);
     Game(const Game& other);
     Game& operator=(Game other);
-    friend void swap(Game& first, Game& second) noexcept;
+    friend void swap(Game& a, Game& b) noexcept;
+    ~Game();
+
     void run();
 
 private:
@@ -32,15 +37,21 @@ private:
     void aplicaAccidentari(Team& team);
     void verificaContracte();
     void oferteTransfer();
+    void showHistory() const;
+    void simulateSeason();
+    void showSeasonStandings() const;
+    void showStats() const;
 
     std::vector<Person*> actors;
     Person* currentActor = nullptr;
     std::vector<Player> transferList;
-    Manager manager1;
-    Manager manager2;
-    Coach coach1;
-    Clasament clasament1;
-    Clasament clasament2;
+    Manager      manager1;
+    Manager      manager2;
+    Coach        coach1;
+    Clasament    clasament1;
+    Clasament    clasament2;
+    History      history;
+    Season*      season = nullptr;
 };
 
-#endif
+#endif // GAME_H

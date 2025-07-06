@@ -73,6 +73,12 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         BudgetManager.cpp
         BudgetManager.h
         Random.h
+        History.cpp
+        History.h
+        Season.cpp
+        Season.h
+        Stats.cpp
+        Stats.h
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

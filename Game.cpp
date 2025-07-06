@@ -14,6 +14,8 @@ void swap(Game& a, Game& b) noexcept {
     swap(a.manager2,     b.manager2);
     swap(a.clasament1,   b.clasament1);
     swap(a.clasament2,   b.clasament2);
+    swap(a.history,      b.history);
+    swap(a.season,       b.season);
 }
 
 Game::Game(const Game& other)
@@ -25,11 +27,20 @@ Game::Game(const Game& other)
   , coach1(other.coach1)
   , clasament1(other.clasament1)
   , clasament2(other.clasament2)
-{}
+  , history(other.history)
+  , season(nullptr)
+{
+    if (other.season)
+        season = new Season(*other.season);
+}
 
 Game& Game::operator=(Game other) {
     swap(*this, other);
     return *this;
+}
+
+Game::~Game() {
+    delete season;
 }
 
 Game::Game(Team& t1, Team& t2)
@@ -44,10 +55,11 @@ Game::Game(Team& t1, Team& t2)
   , coach1("Jordan", t1)
   , clasament1(t1.getName())
   , clasament2(t2.getName())
+  , history()
+  , season(nullptr)
 {
     std::srand(static_cast<unsigned>(std::time(nullptr)));
-    actors.push_back(&manager1);
-    actors.push_back(&coach1);
+    actors = { &manager1, &coach1, &manager2 };
     for (auto& p : t1.getPlayers())
         actors.push_back(&p);
 }
@@ -61,13 +73,17 @@ void Game::displayMenu() const {
               << "5. Antrenează jucător (Manager 1)\n"
               << "6. Antrenează echipa (Coach)\n"
               << "7. Filtrare jucători după poziție\n"
-              << "8. Afișează clasament\n"
+              << "8. Afișează clasament echipă\n"
               << "9. Statistici echipă\n"
               << "10. Top 3 jucători\n"
               << "11. Editează jucător\n"
               << "12. Transfer random între echipe\n"
               << "13. Oferte transfer\n"
               << "14. Verifică contracte\n"
+              << "15. Istoric meciuri\n"
+              << "16. Simulează sezon complet\n"
+              << "17. Afișează clasament sezon\n"
+              << "18. Statistici avansate\n"
               << "0. Ieșire\n"
               << "Alege opțiunea: ";
 }
@@ -75,8 +91,7 @@ void Game::displayMenu() const {
 void Game::handleTransfer() {
     for (size_t i = 0; i < transferList.size(); ++i)
         std::cout << i+1 << ". " << transferList[i] << "\n";
-    int opt;
-    std::cin >> opt;
+    int opt; std::cin >> opt;
     if (opt >= 1 && opt <= static_cast<int>(transferList.size())) {
         if (manager1.buyPlayer(transferList[opt-1]))
             transferList.erase(transferList.begin() + (opt-1));
@@ -86,8 +101,8 @@ void Game::handleTransfer() {
 }
 
 void Game::handleSell() {
-    std::string name;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::string name;
     std::cout << "Numele jucătorului de vândut: ";
     std::getline(std::cin, name);
     if (!manager1.sellPlayer(name))
@@ -98,52 +113,43 @@ void Game::simulateMatch() {
     Match m(manager1.getTeam(), manager2.getTeam());
     m.simulate();
     m.showResult();
-
     aplicaAccidentari(manager1.getTeam());
     aplicaAccidentari(manager2.getTeam());
-
     const auto& p1 = manager1.getTeam().getPlayers();
     const auto& p2 = manager2.getTeam().getPlayers();
-
     std::cout << "Marcatori " << manager1.getTeam().getName() << ": ";
-    if (m.getScore1() == 0) {
+    if (m.getScore1() == 0)
         std::cout << "niciunul";
-    } else {
+    else
         for (int i = 0; i < m.getScore1(); ++i)
-            std::cout << p1[rand() % p1.size()].getName() << " ";
-    }
-    std::cout << "\n";
-
-    std::cout << "Marcatori " << manager2.getTeam().getName() << ": ";
-    if (m.getScore2() == 0) {
+            std::cout << p1[std::rand() % p1.size()].getName() << " ";
+    std::cout << "\nMarcatori " << manager2.getTeam().getName() << ": ";
+    if (m.getScore2() == 0)
         std::cout << "niciunul";
-    } else {
+    else
         for (int i = 0; i < m.getScore2(); ++i)
-            std::cout << p2[rand() % p2.size()].getName() << " ";
-    }
+            std::cout << p2[std::rand() % p2.size()].getName() << " ";
     std::cout << "\n";
-
     clasament1.actualizeaza(m.getScore1(), m.getScore2());
     clasament2.actualizeaza(m.getScore2(), m.getScore1());
+    history.add({ manager1.getTeam().getName(),
+                  m.getScore1(),
+                  manager2.getTeam().getName(),
+                  m.getScore2() });
 }
 
 void Game::handleTrain() {
     std::string nume;
     std::cout << "Numele jucătorului pentru antrenament: ";
     std::cin >> nume;
-
     currentActor = nullptr;
-    for (auto* act : actors) {
-        if (act->getName() == nume) {
+    for (auto* act : actors)
+        if (act->getName() == nume)
             currentActor = act;
-            break;
-        }
-    }
     if (!currentActor) {
         std::cout << "Actor inexistent.\n";
         return;
     }
-
     if (auto* pl = dynamic_cast<Player*>(currentActor)) {
         pl->train(5);
         std::cout << pl->getName() << " skill acum: " << pl->getSkill() << "\n";
@@ -158,25 +164,14 @@ void Game::handleCoachTrain() {
 }
 
 void Game::filterByPosition() {
-    std::string poz;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::string poz;
     std::cout << "Poziția de filtrare (ST, CM, CB, GK): ";
     std::getline(std::cin, poz);
-
-    const auto& v1 = manager1.getTeam().getPlayers();
-    const auto& v2 = manager2.getTeam().getPlayers();
-    bool found1 = false, found2 = false;
-
-    for (const auto& p : v1) if (p.getPosition() == poz) { found1 = true; break; }
-    for (const auto& p : v2) if (p.getPosition() == poz) { found2 = true; break; }
-
     std::cout << "[Manager 1] ";
-    if (found1) manager1.getTeam().afiseazaPePozitie(poz);
-    else std::cout << "Niciun jucător.\n";
-
+    manager1.getTeam().afiseazaPePozitie(poz);
     std::cout << "[Manager 2] ";
-    if (found2) manager2.getTeam().afiseazaPePozitie(poz);
-    else std::cout << "Niciun jucător.\n";
+    manager2.getTeam().afiseazaPePozitie(poz);
 }
 
 void Game::showStatistics() {
@@ -194,11 +189,10 @@ void Game::topJucatori() {
 }
 
 void Game::editeazaJucator() {
-    std::string nume;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::string nume;
     std::cout << "Numele jucătorului de editat: ";
     std::getline(std::cin, nume);
-
     manager1.getTeam().editeazaJucator(nume);
     manager2.getTeam().editeazaJucator(nume);
 }
@@ -208,12 +202,11 @@ void Game::transferRandom() {
 }
 
 void Game::aplicaAccidentari(Team& team) {
-    for (auto& p : team.getPlayers()) {
-        if (!p.isAccidentat() && rand() % 100 < 10) {
+    for (auto& p : team.getPlayers())
+        if (!p.isAccidentat() && std::rand() % 100 < 10) {
             p.accid();
             std::cout << "⚠️ " << p.getName() << " s-a accidentat!\n";
         }
-    }
 }
 
 void Game::verificaContracte() {
@@ -239,9 +232,9 @@ void Game::oferteTransfer() {
         std::cout << "Niciun jucător disponibil.\n";
         return;
     }
-    int idx = rand() % players.size();
+    int idx = std::rand() % players.size();
     Player& p = players[idx];
-    int oferta = static_cast<int>(p.getValue()) + (rand() % 20);
+    int oferta = static_cast<int>(p.getValue()) + (std::rand() % 20);
     std::cout << "💰 Ofertă pentru " << p.getName() << ": " << oferta
               << " (valoare actuală: " << p.getValue() << ")\n"
               << "Acceptați? (1=Da / 0=Nu): ";
@@ -255,6 +248,29 @@ void Game::oferteTransfer() {
     }
 }
 
+void Game::showHistory() const {
+    history.print();
+}
+
+void Game::simulateSeason() {
+    delete season;
+    season = new Season({ &manager1.getTeam(), &manager2.getTeam() });
+    season->playFullSeason();
+    std::cout << "Sezon complet jucat\n";
+}
+
+void Game::showSeasonStandings() const {
+    if (season) season->printStandings();
+    else std::cout << "Niciun sezon jucat\n";
+}
+
+void Game::showStats() const {
+    auto s1 = Stats::compute(manager1.getTeam());
+    auto s2 = Stats::compute(manager2.getTeam());
+    std::cout << manager1.getTeam().getName() << ": " << Stats::format(s1) << "\n";
+    std::cout << manager2.getTeam().getName() << ": " << Stats::format(s2) << "\n";
+}
+
 void Game::run() {
     int choice;
     bool running = true;
@@ -262,24 +278,24 @@ void Game::run() {
         displayMenu();
         std::cin >> choice;
         switch (choice) {
-            case 1:
-                for (auto* a : actors) a->show();
-                break;
-            case 2: handleTransfer();     break;
-            case 3: handleSell();         break;
-            case 4: simulateMatch();      break;
-            case 5: handleTrain();        break;
-            case 6: handleCoachTrain();   break;
-            case 7: filterByPosition();   break;
-            case 8: std::cout << "[Manager 1] "; manager1.getTeam().afiseazaStatistici(); break;
-            case 9: std::cout << "[Manager 2] "; manager2.getTeam().afiseazaStatistici(); break;
-            case 10: topJucatori();        break;
-            case 11: editeazaJucator();    break;
-            case 12: transferRandom();     break;
-            case 13: oferteTransfer();     break;
-            case 14: verificaContracte();  break;
-            case 0: running = false;       break;
-            default: std::cout << "Opțiune invalidă.\n"; break;
+            case 1: for (auto* a : actors) a->show(); break;
+            case 2: handleTransfer();           break;
+            case 3: handleSell();               break;
+            case 4: simulateMatch();            break;
+            case 5: handleTrain();              break;
+            case 6: handleCoachTrain();         break;
+            case 7: filterByPosition();         break;
+            case 8: showStatistics();           break;
+            case 9: topJucatori();              break;
+            case 10: editeazaJucator();          break;
+            case 11: transferRandom();           break;
+            case 12: oferteTransfer();           break;
+            case 13: verificaContracte();        break;
+            case 14: showHistory();              break;
+            case 15: simulateSeason();           break;
+            case 16: showSeasonStandings();      break;
+            case 17: showStats();                break;
+            case 0: running = false;             break;
         }
     }
 }
