@@ -1,4 +1,3 @@
-// Game.cpp
 #include "Game.h"
 #include <iostream>
 #include <limits>
@@ -13,7 +12,6 @@ void swap(Game& a, Game& b) noexcept {
     swap(a.transferList, b.transferList);
     swap(a.manager1,     b.manager1);
     swap(a.manager2,     b.manager2);
-    // coach1 holds a reference; do not swap
     swap(a.clasament1,   b.clasament1);
     swap(a.clasament2,   b.clasament2);
 }
